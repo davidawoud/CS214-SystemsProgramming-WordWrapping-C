@@ -8,7 +8,43 @@
 #define TRUE 1
 #define FALSE 0
 
-//wrap a file method --HERE--
+int wrapfile(int input_file, int output_file, int width) {
+	char buffer[BUFFER_SIZE];
+	int bufferOffset = 0, currLineLength = 0, currWordLength = 0;
+	int whitespaceSequence = FALSE, newLineSequence = FALSE;
+
+	while (read(input_file, buffer, BUFFER_SIZE) != 0) { //Keeps reading until no input is left
+		for (int x = 0; x < BUFFER_SIZE, x++) {
+			if (buffer[x] != ' ' && buffer[x] != '\n' && buffer[x] != '\t') {  //Checks for non whitespace character
+				if (currWordLength != 0){ //Occurs when the first letter of the next word is found
+					whitespaceSequence = FALSE;
+					if (currWordLength + currLineLength <= width) {
+						if (currLineLength != 0) {
+							write(output_file, ' ', 1);
+						}
+						write(output_file, buffer + bufferOffset, currWordLength);
+						currWordLength = 0;
+						bufferOffset = x;
+					}
+
+
+					currWordLength = 0;
+				}
+			}
+			else {
+				if (!whitespaceSequence) {
+					whitespaceSequence = TRUE;
+					currWordLength = x - bufferOffset + 1;
+					if (buffer[x] == '\n') {
+						if (newLineSequence )
+						newLineSequence = TRUE;
+					}
+				}
+			}
+
+		}
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -69,32 +105,4 @@ int main(int argc, char **argv)
     if(input_fd != STDIN_FILENO)
         close(input_fd);
     return 0;
-}
-
-int wrapfile(int input_file, int output_file, int width) {
-	char buffer[BUFFER_SIZE];
-	int bufferOffset = 0, currLineLength = 0, currWordLength = 0;
-	int whitespaceSequence = FALSE, newLineSequence = FALSE;
-
-	while (read(input_file, buffer, BUFFER_SIZE) != 0) { //Keeps reading until no input is left
-		for (int x = 0; x < BUFFER_SIZE, x++) {
-			if (buffer[x] != ' ' && buffer[x] != '\n' && buffer[x] != '\t') {  //Checks for non whitespace character
-				if (currWordLength != 0){ //Occurs when the first letter of the next word is found
-					if (currWordLength + currLineLength <= width) {
-						if ()
-						write(output_file, buffer + bufferOffset, currWordLength);
-					}
-
-
-					currWordLength = 0;
-				}
-			}
-			else {
-				if (!whitespaceSequence) {
-					currWordLength = x - bufferOffset + 1;
-				}
-			}
-
-		}
-	}
 }
