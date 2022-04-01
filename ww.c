@@ -11,42 +11,56 @@
 int wrapfile(int input_file, int output_file, int width) {
 	char buffer[BUFFER_SIZE];
 	int bufferOffset = 0, currLineLength = 0, currWordLength = 0;
-	int whitespaceSequence = FALSE, newLineSequence = FALSE;
+	int failure = FALSE;
+	int whitespaceSequence = FALSE, whitespaceCounter = 0;
 
 	while (read(input_file, buffer, BUFFER_SIZE) != 0) { //Keeps reading until no input is left
 		for (int x = 0; x < BUFFER_SIZE, x++) {
 			if (buffer[x] != ' ' && buffer[x] != '\n' && buffer[x] != '\t') {  //Checks for non whitespace character
-				if (currWordLength != 0){ //Occurs when the first letter of the next word is found
+				if (whitespaceSequence){ //Occurs when the first letter of the next word is found
 					whitespaceSequence = FALSE;
-					if (currWordLength + currLineLength <= width) {
-						if (currLineLength != 0) {
+					if (currWordLength + currLineLength < width) { //Checks to see if word fits
+						if (currLineLength != 0) { //If start of line, no space
 							write(output_file, ' ', 1);
+						}
+						else if (newLineCounter >= 2) { //If there are >2 \n, new line
+							write(output_file,'\n', 1);
+							newLineCounter = 0;
 						}
 						write(output_file, buffer + bufferOffset, currWordLength);
 						currWordLength = 0;
 						bufferOffset = x;
 					}
-					else if () {
-
-					}
+					else
+						if (currWordLength > width) {
+							write(output_file, buffer + bufferOffset, currWordLength);
+							failure = TRUE;
+						}
+						else
+						{
+							write(output_file, '\n', 1);
+							write(output_file, buffer+bufferOffset, currWordLength);
+						}
 
 				}
+				currWordLength++;
 			}
 			else { //Whitespace character
 				if (!whitespaceSequence) { //End of word
 					whitespaceSequence = TRUE;
-					currWordLength = x - bufferOffset + 1;
-
 				}
-				if (buffer[x] == '\n') {
-					if (newLineSequence == FALSE) {
-						newLineSequence = TRUE;
-					}
+				if (buffer[x] == '\n') { //If there are two new line characters in one sequence, new paragraph
+					newLineCounter++;
 				}
 			}
-
 		}
+
 	}
+}
+if (FAILURE)
+	return EXIT_FAILURE;
+else
+	return EXIT_SUCCESS;
 }
 
 int main(int argc, char **argv)
