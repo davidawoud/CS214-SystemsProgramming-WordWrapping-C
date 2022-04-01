@@ -17,23 +17,21 @@ int wrapfile(int input_file, int output_file, int width) {
 
 	while (read(input_file, buffer, BUFFER_SIZE) != 0) { //Keeps reading until no input is left
 		for (int x = 0; x < BUFFER_SIZE; x++) {
-			if (buffer[x] != ' ' && buffer[x] != '\n' && buffer[x] != '\t') {  //Checks for non whitespace character
+			if (!isspace(buffer[x])) {  //Checks for non whitespace character
 				if (whitespaceSequence){ //Occurs when the first letter of the next word is found
 					whitespaceSequence = FALSE;
 					if (currWordLength + currLineLength < width) { //Checks to see if word fits
 						if (currLineLength != 0) { //If start of line, no space
 							write(output_file, ' ', 1);
 						}
-						else if (newLineCounter >= 2) { //If there are >2 \n, new line
-							write(output_file,'\n', 1);
-							newLineCounter = 0;
-						}
 						write(output_file, buffer + bufferOffset, currWordLength);
 						currWordLength = 0;
 						bufferOffset = x;
 					}
 					else
+                    {
 						if (currWordLength > width) {
+                            write(output_file, '\n', 1);
 							write(output_file, buffer + bufferOffset, currWordLength);
 							failure = TRUE;
 						}
@@ -41,8 +39,16 @@ int wrapfile(int input_file, int output_file, int width) {
 						{
 							write(output_file, '\n', 1);
 							write(output_file, buffer+bufferOffset, currWordLength);
+                            currLineLength = currWordLength;
 						}
+                        currWordLength = 0;
+                    }
 
+                    if (newLineCounter >= 2) { //If there are >2 \n, new line
+						write(output_file,'\n\n', 2);
+                        currLineLength = 0;
+					}
+                    newLineCounter = 0;
 				}
 				currWordLength++;
 			}
@@ -56,6 +62,13 @@ int wrapfile(int input_file, int output_file, int width) {
 			}
 		}
 
+        char buffer_leftover[currWordLength];
+        for (int i = 0; i < currWordLength; i++)
+        {
+            buffer_leftover[i] = buffer[bufferOffset];
+            bufferOffset++;
+        }
+        bufferOffset = 0;
 	}
 
     if (failure)
