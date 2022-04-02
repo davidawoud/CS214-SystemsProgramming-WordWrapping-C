@@ -56,8 +56,7 @@ int wrapfile(int input_file, int output_file, int width) {
 							currLineLength = 0;
 
 						}
-						else
-						{
+						else {
 							write(output_file, "\n", 1);
 							write(output_file, buffer + bufferOffset, currWordLength);
 							currLineLength = currWordLength;
@@ -94,6 +93,20 @@ int wrapfile(int input_file, int output_file, int width) {
 		bufferOffset = 0;
 
 		bytesRead = read(input_file, buffer, BUFFER_SIZE);
+	}
+	if (buffer_leftover_size == 0) {
+		free(buffer_leftover);
+	}
+	else {
+		if (buffer_leftover_size + currLineLength < width){
+			write(output_file, " ", 1);
+			write(output_file, buffer_leftover, buffer_leftover_size);
+		}
+		else {
+			write(output_file, "\n", 1);
+			write(output_file, buffer_leftover, buffer_leftover_size);
+		}
+		free(buffer_leftover);
 	}
 
 
