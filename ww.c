@@ -84,17 +84,17 @@ int wrapfile(int input_file, int output_file, int width) {
 			}
 		}
 
-		if (x == bytesRead - 1) {
-			buffer_leftover_size = currWordLength;
-			buffer_leftover = malloc(currWordLength * sizeof(char));
-			for (int i = 0; i < buffer_leftover_size; i++)
-			{
-				*(buffer_leftover + (i*sizeof(char))) = buffer[bufferOffset];
-				bufferOffset++;
-			}
-			bufferOffset = 0;
+		buffer_leftover_size = currWordLength;
+		buffer_leftover = malloc(currWordLength * sizeof(char));
+		for (int i = 0; i < buffer_leftover_size; i++)
+		{
+			*(buffer_leftover + (i*sizeof(char))) = buffer[bufferOffset];
+			bufferOffset++;
 		}
+		bufferOffset = 0;
+
 	}
+
 
 	if (failure)
 		return EXIT_FAILURE;
