@@ -49,7 +49,16 @@ int wrapfile(int input_file, int output_file, int width) {
 					{
 						if (currWordLength > width) {
 							write(output_file, "\n", 1);
-							write(output_file, buffer + bufferOffset, currWordLength);
+							if (buffer_leftover_size != 0)
+							{
+								write(output_file, buffer_leftover, buffer_leftover_size);
+								free(buffer_leftover);
+								buffer_leftover = NULL;
+								buffer_leftover_size = 0;
+								write(output_file, buffer + bufferOffset, currWordLength - buffer_leftover_size);
+							}
+							else
+								write(output_file, buffer + bufferOffset, currWordLength);
 							failure = TRUE;
 							write(output_file, "\n", 1);
 							currWordLength = 0;
@@ -58,7 +67,16 @@ int wrapfile(int input_file, int output_file, int width) {
 						}
 						else {
 							write(output_file, "\n", 1);
-							write(output_file, buffer + bufferOffset, currWordLength);
+							if (buffer_leftover_size != 0)
+							{
+								write(output_file, buffer_leftover, buffer_leftover_size);
+								free(buffer_leftover);
+								buffer_leftover = NULL;
+								buffer_leftover_size = 0;
+								write(output_file, buffer + bufferOffset, currWordLength - buffer_leftover_size);
+							}
+							else
+								write(output_file, buffer + bufferOffset, currWordLength);
 							currLineLength = currWordLength;
 						}
 						bufferOffset = x;
