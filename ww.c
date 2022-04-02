@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <ctype.h>
 
 #define BUFFER_SIZE 128
 #define TRUE 1
@@ -21,24 +22,23 @@ int wrapfile(int input_file, int output_file, int width) {
 	int bytesRead = read(input_file, buffer, BUFFER_SIZE);
 	while (bytesRead != 0) { //Keeps reading until no input is left
 		for (int x = 0; x < bytesRead; x++) {
+
 			if (!isspace(buffer[x])) {  //Checks for non whitespace character
-				if (whitespaceSequence){ //Occurs when the first letter of the next word is found
+				if (whitespaceSequence) { //Occurs when the first letter of the next word is found
 					whitespaceSequence = FALSE;
 					if (currWordLength + currLineLength < width) { //Checks to see if word fits
 						if (currLineLength != 0) { //If start of line, no space
 							write(output_file, " " , 1);
 							currLineLength++;
 						}
-						if (buffer_leftover_size != 0)
-						{
+						if (buffer_leftover_size != 0) {
 							write(output_file, buffer_leftover, buffer_leftover_size);
 							free(buffer_leftover);
 							buffer_leftover = NULL;
-							buffer_leftover_size = 0;
 							write(output_file, buffer + bufferOffset, currWordLength - buffer_leftover_size);
+							buffer_leftover_size = 0;
 						}
-						else
-						{
+						else {
 							write(output_file, buffer + bufferOffset, currWordLength);
 						}
 						currLineLength += currWordLength;
@@ -49,13 +49,12 @@ int wrapfile(int input_file, int output_file, int width) {
 					{
 						if (currWordLength > width) {
 							write(output_file, "\n", 1);
-							if (buffer_leftover_size != 0)
-							{
+							if (buffer_leftover_size != 0) {
 								write(output_file, buffer_leftover, buffer_leftover_size);
 								free(buffer_leftover);
 								buffer_leftover = NULL;
-								buffer_leftover_size = 0;
 								write(output_file, buffer + bufferOffset, currWordLength - buffer_leftover_size);
+								buffer_leftover_size = 0;
 							}
 							else
 								write(output_file, buffer + bufferOffset, currWordLength);
@@ -72,8 +71,8 @@ int wrapfile(int input_file, int output_file, int width) {
 								write(output_file, buffer_leftover, buffer_leftover_size);
 								free(buffer_leftover);
 								buffer_leftover = NULL;
-								buffer_leftover_size = 0;
 								write(output_file, buffer + bufferOffset, currWordLength - buffer_leftover_size);
+								buffer_leftover_size = 0;
 							}
 							else
 								write(output_file, buffer + bufferOffset, currWordLength);
@@ -117,7 +116,9 @@ int wrapfile(int input_file, int output_file, int width) {
 	}
 	else {
 		if (buffer_leftover_size + currLineLength < width){
-			write(output_file, " ", 1);
+			if (currLineLength != 0) {
+				write(output_file, " ", 1);
+			}
 			write(output_file, buffer_leftover, buffer_leftover_size);
 		}
 		else {
@@ -126,7 +127,6 @@ int wrapfile(int input_file, int output_file, int width) {
 		}
 		free(buffer_leftover);
 	}
-
 
 	if (failure)
 		return EXIT_FAILURE;
@@ -142,74 +142,61 @@ int main(int argc, char **argv)
 	DIR * input_dir;
 	struct stat input_stats;
 	int output_fd = -1;
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		perror("Too few arguments");
 		return EXIT_FAILURE;
 	}
-	if (argc > 3)
-	{
+	if (argc > 3) {
 		perror("Too many arguments");
 		return EXIT_FAILURE;
 	}
-	if (argc == 3)
-	{
+	if (argc == 3) {
 		wrapping_width = atoi(argv[1]);
 		path = argv[2];
 		// read from a file code
 		stat(path, &input_stats);
 		// Check for file existence
-		if (input_stats.st_mode)
-		{
-			if (S_ISDIR(input_stats.st_mode))
-			{
+		if (input_stats.st_mode) {
+			if (S_ISDIR(input_stats.st_mode)) {
 				input_dir = opendir(path);
 			}
-			else
-			{
+			else {
 				input_fd = open(path, O_RDONLY);
 				output_fd = STDOUT_FILENO; //this means we are writing to standard output
 			}
 		}
-		else
-		{
+		else {
 			//puts(input_stats.st_mode);
 			perror("Input file does not exist");
 			return EXIT_FAILURE;
 		}
 	}
-	else
-	{
+	else {
 		wrapping_width = atoi(argv[1]);
 		input_fd = STDIN_FILENO; //this means we are reading from standard input
 	}
 
 	//check file or directory
-	if(S_ISDIR(input_stats.st_mode))
-	{
+	if(S_ISDIR(input_stats.st_mode)) {
 		struct dirent *de;
 		de = readdir(input_dir);
-		while (de != NULL)
-		{
+		while (de != NULL) {
 			char *file_name = de->d_name;
 			if(!(file_name[0] == '.' || strncmp("wrap.", file_name, strlen("wrap.")) == 0))
 			{
 				int file_fd = open(path + '/' + *file_name, O_RDONLY);
 				output_fd = open(path + '/wrap.' + *file_name, O_WRONLY|O_CREAT|O_TRUNC, 600);
-				if(S_ISDIR(file_fd))
-				{
+				if(S_ISDIR(file_fd)) {
 					de = readdir(input_dir);
 					continue;
 				}
 				wrapfile(file_fd, output_fd, wrapping_width);
 			}
-
 			de = readdir(input_dir);
 		}
 		closedir(input_dir);
 	}
-	else
-	{
+	else {
 		wrapfile(input_fd, output_fd, wrapping_width);
 	}
 
