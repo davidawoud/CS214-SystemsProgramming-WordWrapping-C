@@ -93,6 +93,7 @@ int wrapfile(int input_file, int output_file, int width) {
 		}
 		bufferOffset = 0;
 
+		bytesRead = read(input_file, buffer, BUFFER_SIZE);
 	}
 
 
