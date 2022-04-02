@@ -53,13 +53,15 @@ int wrapfile(int input_file, int output_file, int width) {
                             write(output_file, "\n", 1);
                             currWordLength = 0;
                             currLineLength = 0;
+
 						}
 						else
 						{
 							write(output_file, "\n", 1);
-							write(output_file, buffer+bufferOffset, currWordLength);
+							write(output_file, buffer + bufferOffset, currWordLength);
                             currLineLength = currWordLength;
 						}
+						bufferOffset = x;
                         currWordLength = 0;
                     }
 
