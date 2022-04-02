@@ -12,10 +12,10 @@ int wrapfile(int input_file, int output_file, int width) {
 	char buffer[BUFFER_SIZE];
 	int bufferOffset = 0, currLineLength = 0, currWordLength = 0;
 	int failure = FALSE;
-	int whitespaceSequence = FALSE, whitespaceCounter = 0;
+	int whitespaceSequence = FALSE, newLineCounter = 0;
 
 	while (read(input_file, buffer, BUFFER_SIZE) != 0) { //Keeps reading until no input is left
-		for (int x = 0; x < BUFFER_SIZE, x++) {
+		for (int x = 0; x < BUFFER_SIZE; x++) {
 			if (buffer[x] != ' ' && buffer[x] != '\n' && buffer[x] != '\t') {  //Checks for non whitespace character
 				if (whitespaceSequence){ //Occurs when the first letter of the next word is found
 					whitespaceSequence = FALSE;
@@ -32,13 +32,12 @@ int wrapfile(int input_file, int output_file, int width) {
 						bufferOffset = x;
 					}
 					else
-						if (currWordLength > width) {
+						if (currWordLength > width) { //Word is greater than width
 							write(output_file, buffer + bufferOffset, currWordLength);
 							failure = TRUE;
 						}
-						else
-						{
-							write(output_file, '\n', 1);
+						else {
+							write(output_file, '\n', 1); //Move to next line
 							write(output_file, buffer+bufferOffset, currWordLength);
 						}
 
@@ -56,12 +55,12 @@ int wrapfile(int input_file, int output_file, int width) {
 		}
 
 	}
+	if (failure)
+		return EXIT_FAILURE;
+	else
+		return EXIT_SUCCESS;
 }
-if (FAILURE)
-	return EXIT_FAILURE;
-else
-	return EXIT_SUCCESS;
-}
+
 
 int main(int argc, char **argv)
 {
